@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import ScrollToTop from './components/ui/ScrollToTop'
+import ChatWidget from './components/ui/ChatWidget'
 import Home from './pages/Home'
 import About from './pages/About'
 import Services from './pages/Services'
@@ -59,6 +60,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <ChatWidget />
         <Toaster
           position="bottom-right"
           toastOptions={{
