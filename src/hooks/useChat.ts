@@ -67,20 +67,26 @@ export function useChat() {
         ];
 
         setMessages((prev) => [...prev, botMessage]);
-      } catch (err: unknown) {
+      } catch (err: any) {
         console.error('Zuna AI error:', err);
 
         let errorMessage = '⚠️ Something went wrong. Please try again.';
-        const errMsg = err instanceof Error ? err.message : '';
+        const errMsg = err instanceof Error ? err.message : (typeof err === 'object' && err !== null && 'message' in err ? String(err.message) : '');
+        const errStatus = typeof err === 'object' && err !== null && 'status' in err ? Number(err.status) : undefined;
+        const errCode = typeof err === 'object' && err !== null && 'error' in err && typeof err.error === 'object' && err.error !== null && 'code' in err.error ? String(err.error.code) : '';
 
-        if (errMsg.includes('VITE_GEMINI_API_KEY')) {
-          errorMessage = '🔑 API key missing. Add VITE_GEMINI_API_KEY to your .env file.';
-        } else if (errMsg.includes('API_KEY_INVALID') || errMsg.includes('400')) {
-          errorMessage = '🔑 Invalid API key. Please check your VITE_GEMINI_API_KEY in .env';
-        } else if (errMsg.includes('quota') || errMsg.includes('429')) {
+        if (errMsg.includes('VITE_GROQ_API_KEY')) {
+          errorMessage = '🔑 API key missing. Add VITE_GROQ_API_KEY to your .env file.';
+        } else if (errMsg.includes('model_decommissioned') || errCode === 'model_decommissioned') {
+          errorMessage = '🤖 The AI model specified is decommissioned. Please update the model ID in the code.';
+        } else if (errStatus === 401 || errMsg.includes('API_KEY_INVALID')) {
+          errorMessage = '🔑 Invalid API key. Please check your VITE_GROQ_API_KEY in .env';
+        } else if (errStatus === 429 || errMsg.includes('quota') || errMsg.includes('rate limit')) {
           errorMessage = '⏳ Rate limit reached. Please wait a moment and try again.';
-        } else if (errMsg.includes('PERMISSION_DENIED') || errMsg.includes('403')) {
-          errorMessage = '🚫 API key lacks permission. Check your Google AI Studio key.';
+        } else if (errStatus === 400) {
+          errorMessage = `🚫 Bad Request: ${errMsg}`;
+        } else if (errStatus === 403) {
+          errorMessage = '🚫 API key lacks permission. Check your Groq console key.';
         }
 
         setError(errorMessage);
